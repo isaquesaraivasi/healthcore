@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hackaton-soat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hackaton-soat
+  template:
+    metadata:
+      labels:
+        app: hackaton-soat
+    spec:
+      containers:
+        - name: hackaton-soat
+          image: franciscosviana/atendmed:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: hackaton-soat-config
+                  key: db_host
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-hackaton-soat-secret
+                  key: db_user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-hackaton-soat-secret
+                  key: db_password
+            - name: DB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-hackaton-soat-secret
+                  key: db_root_password
+          envFrom:
+            - configMapRef:
+                name: hackaton-soat-config
+          resources:
+            requests:
+              cpu: 1500m
+              memory: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hackaton-soat-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: hackaton-soat
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

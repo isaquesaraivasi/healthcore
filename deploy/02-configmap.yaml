@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hackaton-soat-config
+data:
+  db_host: "jdbc:mysql://mysql-hackaton-soat-service:3307/hackaton_soat?&createDatabaseIfNotExist=true"
+  MYSQL_DATABASE: "hackaton_soat"

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-hackaton-soat
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: mysql-hackaton-soat
+      labels:
+        app: mysql-hackaton-soat
+    spec:
+      containers:
+        - name: mysql-hackaton-soat
+          image: mysql:8.3.0
+          ports:
+            - containerPort: 3307
+          envFrom:
+            - configMapRef:
+                name: hackaton-soat-config
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-hackaton-soat-secret
+                  key: db_root_password
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-hackaton-soat-secret
+                  key: db_user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-hackaton-soat-secret
+                  key: db_password
+            - name: MYSQL_TCP_PORT
+              value: "3307"
+  selector:
+    matchLabels:
+      app: mysql-hackaton-soat
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-hackaton-soat-service
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 3307
+      targetPort: 3307
+      nodePort: 32000
+  selector:
+    app: mysql-hackaton-soat
